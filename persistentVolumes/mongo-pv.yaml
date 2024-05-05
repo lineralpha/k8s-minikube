@@ -1,0 +1,41 @@
+# define a persistent volume
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: mongo-pv
+spec:
+  capacity:
+    storage: 5Gi
+  volumeMode: Filesystem
+  accessModes:
+    - ReadWriteOnce
+  persistentVolumeReclaimPolicy: Recycle
+  # the pv will be allocated from this storage class
+  storageClassName: slow
+  mountOptions:
+    - hard
+    - nfsvers=4.1
+  # network file system
+  # mount the path /tmp on the server to the pod for this volume
+  nfs:
+    path: /tmp
+    server: my-nfs-server.example.com
+
+---
+# pvc is used to mount a persistent volume into a pod.
+# 
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: MYAPP
+  # pv is unnamespaced, but pvc is namespaced
+  namespace: default
+  labels:
+    app: MYAPP
+spec:
+  storageClassName: rook-ceph-block
+  accessModes:
+  - ReadWriteOnce
+  resources:
+    requests:
+      storage: 10Gi

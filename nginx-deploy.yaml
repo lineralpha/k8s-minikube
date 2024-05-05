@@ -1,0 +1,56 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: nginx-deploy
+  labels:
+    # a label can be any key/value pair
+    app: nginx-deploy
+spec:
+  selector:
+    # select the matching pod template for this deployment
+    matchLabels:
+      app: nginx-pod
+  replicas: 3
+  strategy:
+    rollingUpdate:
+      maxSurge: 25%
+      maxUnavailable: 25%
+    type: RollingUpdate
+  # template for pods
+  template:
+    metadata:
+      # labels for pods created from this template 
+      labels:
+        app: nginx-pod
+    spec:
+      containers:
+      - name: nginx
+        image: nginx:latest
+        resources: {}
+        ports:
+        - containerPort: 80
+        volumeMounts:
+        - mountPath: "/var/www/html"
+          name: mypd
+      volumes:
+      - name: mypd
+        persistentVolumeClaim:
+          claimName: pvc-name
+      restartPolicy: Always
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: nginx-service
+spec:
+  # select pod by matching labels
+  selector:
+    app: nginx-pod
+  type: LoadBalancer
+  ports:
+  - protocol: TCP
+    port: 8080 # external port
+    targetPort: 80 # container port in the pod
+    # If you set the `spec.type` field to `NodePort` and you want a specific port number,
+    # you can specify a value in the `spec.ports[*].nodePort` field.
+    # nodePort: 
