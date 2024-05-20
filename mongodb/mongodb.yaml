@@ -1,8 +1,36 @@
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: mongodb
+  labels:
+    app: mongodb
+
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: mongodb-configmap
+  namespace: mongodb
+data:
+  mongodb_url: mongodb-service
+
+---
+apiVersion: v1
+kind: Secret
+metadata:
+  name: mongodb-secret
+  namespace: mongodb
+type: Opaque
+data:
+  mongo-root-username: bW9uZ29hZG1pbg==
+  mongo-root-password: bW9uZ29zZWNyZXQ=
+
+---
 apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: mongodb-deploy
-  namespace: default
+  namespace: mongodb
   labels:
     app: mongodb-deploy
 spec:
@@ -22,13 +50,11 @@ spec:
         - containerPort: 27017
         env:
         - name: MONGO_INITDB_ROOT_USERNAME
-          # value: mongoadmin
           valueFrom:
             secretKeyRef:
               name: mongodb-secret
               key: mongo-root-username
         - name: MONGO_INITDB_ROOT_PASSWORD
-          # value: mongosecret
           valueFrom:
             secretKeyRef:
               name: mongodb-secret
@@ -41,7 +67,7 @@ apiVersion: v1
 kind: Service
 metadata:
   name: mongodb-service
-  namespace: default
+  namespace: mongodb
 spec:
   selector:
     app: mongodb
@@ -49,4 +75,4 @@ spec:
   ports:
   - protocol: TCP
     port: 27017
-    targetPort: 27017
+    targetPort: 27017 
