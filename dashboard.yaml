@@ -1,6 +1,10 @@
 # kubectl apply -f https://raw.githubusercontent.com/kubernetes/dashboard/v2.2.0/aio/deploy/recommended.yaml
 # kubectl apply -f https://github.com/kubernetes-sigs/metrics-server/releases/download/v0.4.2/components.yaml
 
+# The built-in ingress addon does not work properly on WSL2.
+# Disable the built-in ingress addon, install ingress controller (cloud flavor) from
+# kubectl apply -f https://raw.githubusercontent.com/kubernetes/ingress-nginx/controller-v1.10.1/deploy/static/provider/cloud/deploy.yaml
+
 apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
@@ -11,15 +15,15 @@ metadata:
     # nginx.ingress.kubernetes.io/ssl-passthrough: "true"
     # nginx.ingress.kubernetes.io/backend-protocol: "HTTPS"
 spec:
-  ingressClassName: nginx
+  ingressClassName: nginx # prefer this field than the above annotation
   rules:
-  - host: "dashboard.k8s.atoz.com"
+  - host: "dashboard.atoz.com"
     http:
       paths:
       - pathType: Prefix
         path: "/"
         backend:
-          service:          
+          service:
             name: kubernetes-dashboard
-            port: 
+            port:
               number: 80

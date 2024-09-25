@@ -6,6 +6,7 @@ metadata:
 spec:
   capacity:
     storage: 5Gi
+  # default volume mode is 'Filesystem'. another supported mode is 'Block'
   volumeMode: Filesystem
   accessModes:
     - ReadWriteOnce
@@ -23,7 +24,7 @@ spec:
 
 ---
 # pvc is used to mount a persistent volume into a pod.
-# 
+#
 apiVersion: v1
 kind: PersistentVolumeClaim
 metadata:

@@ -1,0 +1,69 @@
+# A StorageClass describes the class of storage.
+# A StorageClass contains fields to dynamically provision a PV to satisfy a PVC.
+
+apiVersion: storage.k8s.io/v1
+kind: StorageClass
+metadata:
+  name: low-latency
+  annotations:
+    # must be 'true' if it is a default StorageClass in the cluster.
+    # PVC that either has an empty value for 'storageClassName',
+    # or does not have this key, the latest default StorageClass is used
+    # to provision a PV for the PVC.
+    # But if no default StorageClass in the cluster, PVCs with storageClassName setting
+    # to "" can only be bound to PVs that have storageClassName also set to "".
+    storageclass.kubernetes.io/is-default-class: "false"
+provisioner: csi-driver.example-vendor.example
+reclaimPolicy: Retain # default value is Delete
+allowVolumeExpansion: true
+mountOptions:
+  - discard # this might enable UNMAP / TRIM at the block storage layer
+volumeBindingMode: WaitForFirstConsumer
+parameters:
+  guaranteedReadWriteLatency: "true" # provider-specific
+
+---
+apiVersion: storage.k8s.io/v1
+kind: StorageClass
+metadata:
+  name: example-nfs
+provisioner: example.com/external-nfs
+parameters:
+  server: nfs-server.example.com
+  path: /share
+  readOnly: "false"
+
+---
+apiVersion: storage.k8s.io/v1
+kind: StorageClass
+metadata:
+  name: local-storage
+provisioner: kubernetes.io/no-provisioner
+volumeBindingMode: WaitForFirstConsumer
+
+---
+apiVersion: v1
+kind: Pod
+metadata:
+  name: task-pv-pod
+  namespace: default
+  labels:
+    app: task-pv-pod
+spec:
+  nodeSelector:
+    kubernetes.is/hostname: kube-01
+  volumes:
+    - name: task-pv-storage
+      persistentVolumeClaim:
+        claimName: task-pv-claim
+  containers:
+  - name: task-pv-container
+    image: nginx
+    resources: {}
+    ports:
+    - containerPort:  80
+      name:  http
+    volumeMounts:
+    - name: task-pv-storage
+      mountPath: /usr/share/nginx/html
+  restartPolicy: Always

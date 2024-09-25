@@ -1,0 +1,52 @@
+# If running minikube on Linux (WSL2 or Linux VM) with the Docker driver,
+# the node IP is not externally reachable. This also results in no tunnel being created.
+#
+# Services with `type=NodePort` can be exposed via the `minikube service <service-name> --url`
+# command.
+
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  labels:
+    app: helloworld
+  name: helloworld
+  namespace: default
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: helloworld
+  strategy:
+    rollingUpdate:
+      maxSurge: 25%
+      maxUnavailable: 25%
+    type: RollingUpdate
+  template:
+    metadata:
+      labels:
+        app: helloworld
+    spec:
+      containers:
+      - image: kicbase/echo-server:1.0
+        imagePullPolicy: IfNotPresent
+        name: echo-server
+        resources: {}
+        restartPolicy: Always
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  labels:
+    app: helloworld
+  name: helloworld
+  namespace: default
+spec:
+  selector:
+    app: helloworld
+  type: NodePort
+  ports:
+  - protocol: TCP
+    nodePort: 32132
+    port: 8080
+    targetPort: 8080

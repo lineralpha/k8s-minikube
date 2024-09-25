@@ -38,8 +38,9 @@ spec:
   type: ClusterIP
   ports:
   - protocol: TCP
-    port: 8088
-    targetPort: 80
+    port: 8088     # the service port
+    targetPort: 80 # the container port
+    # nodePort:    # not needed for CLusterIP type
 
 ---
 # https://kubernetes.io/docs/concepts/services-networking/ingress/#the-ingress-resource
@@ -49,7 +50,7 @@ metadata:
   name: nginx-ingress
 spec:
   rules:
-  - host: nginx.dli2.com
+  - host: nginx.atoz.com
     http:
       paths:
       - path: /
@@ -58,5 +59,4 @@ spec:
           service:
             name: nginx-service
             port:
-              number: 8088
-              
+              number: 8088 # match the service port #
