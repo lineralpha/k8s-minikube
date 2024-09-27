@@ -1,0 +1,22 @@
+# If running minikube on Linux (WSL2 or Linux VM) with the Docker driver,
+# the node IP is not externally reachable. This also results in no tunnel being created.
+#
+# Services with `type=LoadBalancer` can be exposed via the `minikube tunnel` command.
+# Use the service external IP to reach the service, run
+# `kubectl get svc <service-name>` to get the external IP.
+
+apiVersion: v1
+kind: Service
+metadata:
+  labels:
+    app: hello-web
+  name: hello-web-service
+  namespace: default
+spec:
+  selector:
+    app: hello-web
+  type: LoadBalancer
+  ports:
+  - protocol: TCP
+    port: 8080
+    targetPort: 8080

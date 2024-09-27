@@ -1,3 +1,4 @@
+# this exposes dashboard service on port 443, requires user's login using appropriate credential.
 # kubectl apply -f https://raw.githubusercontent.com/kubernetes/dashboard/v2.2.0/aio/deploy/recommended.yaml
 # kubectl apply -f https://github.com/kubernetes-sigs/metrics-server/releases/download/v0.4.2/components.yaml
 
@@ -5,6 +6,8 @@
 # Disable the built-in ingress addon, install ingress controller (cloud flavor) from
 # kubectl apply -f https://raw.githubusercontent.com/kubernetes/ingress-nginx/controller-v1.10.1/deploy/static/provider/cloud/deploy.yaml
 
+# use the built-in dashboard addon, which expose the dashboard service on port 80.
+# no login is required.
 apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
@@ -17,11 +20,11 @@ metadata:
 spec:
   ingressClassName: nginx # prefer this field than the above annotation
   rules:
-  - host: "dashboard.atoz.com"
+  - host: dashboard.atoz.com
     http:
       paths:
       - pathType: Prefix
-        path: "/"
+        path: /
         backend:
           service:
             name: kubernetes-dashboard

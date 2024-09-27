@@ -49,6 +49,7 @@ kind: Ingress
 metadata:
   name: nginx-ingress
 spec:
+  ingressClassName: nginx
   rules:
   - host: nginx.atoz.com
     http:
