@@ -49,9 +49,30 @@ metadata:
 spec:
   selector:
     app: mongo-express
-  type: LoadBalancer
+  type: ClusterIP
   ports:
   - protocol: TCP
-    port: 8081 
+    port: 8081
     targetPort: 8081
-    nodePort: 32000
+
+---
+# https://kubernetes.io/docs/concepts/services-networking/ingress/#the-ingress-resource
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: mongo-express-ingress
+  namespace: mongodb
+spec:
+  ingressClassName: nginx
+  rules:
+  - host: mongo-express.atoz.com
+    http:
+      paths:
+      - path: /
+        pathType: Prefix
+        backend:
+          service:
+            # https://hub.docker.com/_/mongo-express for login account
+            name: mongo-express-service
+            port:
+              number: 8081
